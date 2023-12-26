@@ -48,15 +48,12 @@
 </template>
 
 <script>
-//这里可以导入其他文件（比如：组件，工具js，第三方插件js，json文件，图片文件等等）
-//例如：import 《组件名称》 from '《组件路径》';
-
 export default {
   //import引入的组件需要注入到对象中才能使用
   components: {},
   data() {
     return {
-      category: { name: "" },
+      category: { name: "", parentCid: 0, catLevel: 0, showStatus: 1, sort: 0 },
       dialogVisible: false,
       menus: [],
       expandedKey: [],
@@ -80,10 +77,24 @@ export default {
     append(data) {
       console.log("append", data);
       this.dialogVisible = true;
+      this.category.parentCid = data.catId;
+      this.category.catLevel = data.catLevel * 1 + 1;
     },
     // 添加三级分类
     addCategory() {
       console.log("提交的三级分类数据", this.category);
+      this.$http({
+        url: this.$http.adornUrl("/product/category/save"),
+        method: "post",
+        data: this.$http.adornData(this.category, false),
+      }).then(({ data }) => {
+        console.log("菜单保存成功");
+      });
+      this.dialogVisible = false;
+      // 刷新出新的菜单
+      this.getMenus();
+      // 设置需要展开的菜单
+      this.expandedKey = [this.category.parentCid];
     },
     remove(node, data) {
       var ids = [data.catId];
